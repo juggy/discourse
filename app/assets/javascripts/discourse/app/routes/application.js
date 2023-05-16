@@ -213,13 +213,13 @@ const ApplicationRoute = DiscourseRoute.extend(OpenComposer, {
       user.checkEmail();
     },
 
-    changeBulkTemplate(w) {
+    changeBulkTemplate(w, into = "modal/topic-bulk-actions") {
       const controllerName = w.replace("modal/", "");
       const controller = getOwner(this).lookup("controller:" + controllerName);
       this.render(w, {
-        into: "modal/topic-bulk-actions",
+        into,
         outlet: "bulkOutlet",
-        controller: controller ? controllerName : "topic-bulk-actions",
+        controller: controller ? controllerName : into.replace("modal/", ""),
       });
     },
 

@@ -178,6 +178,19 @@ Bookmark.reopenClass({
   async applyTransformations(bookmarks) {
     await applyModelTransformations("bookmark", bookmarks);
   },
+
+  bulkOperation(bookmarks, operation, tracked) {
+    const data = {
+      bookmark_ids: bookmarks.mapBy("id"),
+      operation,
+      tracked,
+    };
+
+    return ajax("/bookmarks/bulk", {
+      type: "PUT",
+      data,
+    });
+  },
 });
 
 export default Bookmark;

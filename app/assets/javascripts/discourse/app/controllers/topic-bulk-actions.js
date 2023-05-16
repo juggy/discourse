@@ -1,11 +1,9 @@
 import { alias, empty } from "@ember/object/computed";
 import Controller, { inject as controller } from "@ember/controller";
 import I18n from "I18n";
+import BulkActions from "discourse/mixins/bulk-actions";
 import ModalFunctionality from "discourse/mixins/modal-functionality";
-import { Promise } from "rsvp";
 import Topic from "discourse/models/topic";
-
-import { inject as service } from "@ember/service";
 
 const _buttons = [];
 
@@ -117,13 +115,11 @@ addBulkButton("deleteTopics", "delete", {
 });
 
 // Modal for performing bulk actions on topics
-export default Controller.extend(ModalFunctionality, {
+export default Controller.extend(ModalFunctionality, BulkActions, {
   userPrivateMessages: controller("user-private-messages"),
-  dialog: service(),
   tags: null,
   emptyTags: empty("tags"),
   categoryId: alias("model.category.id"),
-  processedTopicCount: 0,
   isGroup: alias("userPrivateMessages.isGroup"),
   groupFilter: alias("userPrivateMessages.groupFilter"),
 
@@ -142,76 +138,8 @@ export default Controller.extend(ModalFunctionality, {
     this.send("changeBulkTemplate", "modal/bulk-actions-buttons");
   },
 
-  perform(operation) {
-    this.set("processedTopicCount", 0);
-    if (this.get("model.topics").length > 20) {
-      this.send("changeBulkTemplate", "modal/bulk-progress");
-    }
-
-    this.set("loading", true);
-
-    return this._processChunks(operation)
-      .catch(() => {
-        this.dialog.alert(I18n.t("generic_error"));
-      })
-      .finally(() => {
-        this.set("loading", false);
-      });
-  },
-
-  _generateTopicChunks(allTopics) {
-    let startIndex = 0;
-    const chunkSize = 30;
-    const chunks = [];
-
-    while (startIndex < allTopics.length) {
-      let topics = allTopics.slice(startIndex, startIndex + chunkSize);
-      chunks.push(topics);
-      startIndex += chunkSize;
-    }
-
-    return chunks;
-  },
-
-  _processChunks(operation) {
-    const allTopics = this.get("model.topics");
-    const topicChunks = this._generateTopicChunks(allTopics);
-    const topicIds = [];
-
-    const tasks = topicChunks.map((topics) => () => {
-      return Topic.bulkOperation(topics, operation).then((result) => {
-        this.set(
-          "processedTopicCount",
-          this.get("processedTopicCount") + topics.length
-        );
-        return result;
-      });
-    });
-
-    return new Promise((resolve, reject) => {
-      const resolveNextTask = () => {
-        if (tasks.length === 0) {
-          const topics = topicIds.map((id) => allTopics.findBy("id", id));
-          return resolve(topics);
-        }
-
-        tasks
-          .shift()()
-          .then((result) => {
-            if (result && result.topic_ids) {
-              topicIds.push(...result.topic_ids);
-            }
-            resolveNextTask();
-          })
-          .catch(reject);
-      };
-
-      resolveNextTask();
-    });
-  },
-
   forEachPerformed(operation, cb) {
-    this.perform(operation).then((topics) => {
+    this.perform(this.model.topics, operation).then((topics) => {
       if (topics) {
         topics.forEach(cb);
         (this.refreshClosure || identity)();
@@ -220,11 +148,10 @@ export default Controller.extend(ModalFunctionality, {
     });
   },
 
-  performAndRefresh(operation) {
-    return this.perform(operation).then(() => {
-      (this.refreshClosure || identity)();
-      this.send("closeModal");
-    });
+  bulkOperation: Topic.bulkOperation,
+
+  idsFromResults(result) {
+    return result?.topic_ids;
   },
 
   actions: {
@@ -237,7 +164,10 @@ export default Controller.extend(ModalFunctionality, {
     },
 
     changeTags() {
-      this.performAndRefresh({ type: "change_tags", tags: this.tags });
+      this.performAndRefresh(this.model.topics, {
+        type: "change_tags",
+        tags: this.tags,
+      });
     },
 
     showAppendTagTopics() {
@@ -249,7 +179,10 @@ export default Controller.extend(ModalFunctionality, {
     },
 
     appendTags() {
-      this.performAndRefresh({ type: "append_tags", tags: this.tags });
+      this.performAndRefresh(this.model.topics, {
+        type: "append_tags",
+        tags: this.tags,
+      });
     },
 
     showChangeCategory() {
@@ -261,7 +194,7 @@ export default Controller.extend(ModalFunctionality, {
     },
 
     deleteTopics() {
-      this.performAndRefresh({ type: "delete" });
+      this.performAndRefresh(this.model.topics, { type: "delete" });
     },
 
     closeTopics() {
@@ -279,7 +212,7 @@ export default Controller.extend(ModalFunctionality, {
       if (this.isGroup) {
         params.group = this.groupFilter;
       }
-      this.performAndRefresh(params);
+      this.performAndRefresh(this.model.topics, params);
     },
 
     moveMessagesToInbox() {
@@ -287,7 +220,7 @@ export default Controller.extend(ModalFunctionality, {
       if (this.isGroup) {
         params.group = this.groupFilter;
       }
-      this.performAndRefresh(params);
+      this.performAndRefresh(this.model.topics, params);
     },
 
     unlistTopics() {
@@ -299,7 +232,7 @@ export default Controller.extend(ModalFunctionality, {
     },
 
     resetBumpDateTopics() {
-      this.performAndRefresh({ type: "reset_bump_dates" });
+      this.performAndRefresh(this.model.topics, { type: "reset_bump_dates" });
     },
 
     changeCategory() {
@@ -315,7 +248,9 @@ export default Controller.extend(ModalFunctionality, {
     },
 
     deletePostTiming() {
-      this.performAndRefresh({ type: "destroy_post_timing" });
+      this.performAndRefresh(this.model.topics, {
+        type: "destroy_post_timing",
+      });
     },
 
     removeTags() {
@@ -323,7 +258,8 @@ export default Controller.extend(ModalFunctionality, {
         message: I18n.t("topics.bulk.confirm_remove_tags", {
           count: this.get("model.topics").length,
         }),
-        didConfirm: () => this.performAndRefresh({ type: "remove_tags" }),
+        didConfirm: () =>
+          this.performAndRefresh(this.model.topics, { type: "remove_tags" }),
       });
     },
   },

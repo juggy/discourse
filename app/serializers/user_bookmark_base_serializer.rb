@@ -6,6 +6,7 @@ class UserBookmarkBaseSerializer < ApplicationSerializer
              :updated_at,
              :name,
              :reminder_at,
+             :reminder_set_at,
              :reminder_at_ics_start,
              :reminder_at_ics_end,
              :pinned,

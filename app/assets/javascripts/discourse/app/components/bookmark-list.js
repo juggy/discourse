@@ -65,11 +65,11 @@ export default Component.extend(Scrolling, BulkTopicSelection, {
   showBulkActions() {
     const controller = showModal("bookmark-bulk-actions", {
       model: {
-        topics: this.selected
+        bookmarks: this.selected,
       },
-      title: "topics.bulk.actions",
+      title: "bookmarks.bulk.actions",
     });
 
-    controller.set("refreshClosure", () => this.send("refresh"));
-  }
+    controller.set("refreshClosure", this.reload);
+  },
 });

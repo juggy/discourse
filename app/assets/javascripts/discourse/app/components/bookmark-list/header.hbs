@@ -4,7 +4,7 @@
       <FlatButton
         class="bulk-select"
         @icon="list"
-        @title="topics.bulk.toggle"
+        @title="bookmarks.bulk.toggle"
         @action={{this.toggleBulkSelection}}
       />
     </th>
@@ -14,7 +14,7 @@
       <FlatButton
         class="bulk-select"
         @icon="list"
-        @title="topics.bulk.toggle"
+        @title="bookmarks.bulk.toggle"
         @action={{this.toggleBulkSelection}}
       />
     {{/unless}}
@@ -23,8 +23,8 @@
         {{#if this.canDoBulkAction}}
           <button type="button" class='btn btn-icon no-text bulk-select-actions' {{on "click" this.bulkActions}}>{{d-icon "cog"}}&#8203;</button>
         {{/if}}
-        <button type="button" class='btn btn-default bulk-select-all' {{on "click" this.selectAll}}>{{i18n "topics.bulk.select_all"}}</button>
-        <button type="button" class='btn btn-default bulk-clear-all' {{on "click" this.clearAll}}>{{i18n "topics.bulk.clear_all"}}</button>
+        <button type="button" class='btn btn-default bulk-select-all' {{on "click" this.selectAll}}>{{i18n "bookmarks.bulk.select_all"}}</button>
+        <button type="button" class='btn btn-default bulk-clear-all' {{on "click" this.clearAll}}>{{i18n "bookmarks.bulk.clear_all"}}</button>
       </span>
     {{/if}}
     <span>{{i18n "topic.title"}}</span>
