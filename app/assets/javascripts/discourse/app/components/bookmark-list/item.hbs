@@ -1,0 +1,122 @@
+{{#if this.bulkSelectEnabled}}
+  <th class="topic-list-data">
+    <label class="bulk-select" for="bulk-select-{{this.bookmark.id}}">
+      <input class="bulk-select" type="checkbox" id="bulk-select-{{this.bookmark.id}}">
+    </label>
+  </th>
+{{/if}}
+<th scope="row" class="main-link topic-list-data">
+  <span class="link-top-line">
+    <div class="bookmark-metadata">
+      {{#if this.bookmark.reminder_at}}
+        <span
+          class="bookmark-metadata-item bookmark-reminder
+            {{if
+              this.bookmark.reminderAtExpired
+              'bookmark-expired-reminder'
+            }}"
+        >
+          {{d-icon "far-clock"}}{{this.bookmark.formattedReminder}}
+        </span>
+      {{/if}}
+      {{#if this.bookmark.name}}
+        <span class="bookmark-metadata-item">
+          {{d-icon "info-circle"}}<span>{{this.bookmark.name}}</span>
+        </span>
+      {{/if}}
+    </div>
+    <div class="bookmark-status-with-link">
+      {{#if this.bookmark.pinned}}
+        {{d-icon "thumbtack" class="bookmark-pinned"}}
+      {{/if}}
+      {{#if this.bookmark.bookmarkableTopicAlike}}
+        <TopicStatus @topic={{this.bookmark.topicStatus}} />
+        {{topic-link this.bookmark.topicForList}}
+      {{else}}
+        <a
+          href={{this.bookmark.bookmarkable_url}}
+          role="heading"
+          aria-level="2"
+          class="title"
+          data-topic-id="${topic.id}"
+        >
+          {{this.bookmark.fancy_title}}
+        </a>
+      {{/if}}
+    </div>
+  </span>
+  {{#if this.bookmark.bookmarkableTopicAlike}}
+    <div class="link-bottom-line">
+      {{category-link this.bookmark.category}}
+      {{discourse-tags
+        this.bookmark
+        mode="list"
+        tagsForUser=this.tagsForUser
+      }}
+    </div>
+  {{/if}}
+  {{#if
+    (and
+      this.site.mobileView
+      this.bookmark.excerpt
+      this.bookmark.user.avatar_template
+    )
+  }}
+    <a
+      href={{this.bookmark.bookmarkableUser.path}}
+      data-user-card={{this.bookmark.user.username}}
+      class="avatar"
+    >
+      {{avatar
+        this.bookmark.bookmarkableUser
+        avatarTemplatePath="avatar_template"
+        usernamePath="username"
+        namePath="name"
+        imageSize="small"
+      }}
+    </a>
+  {{/if}}
+  {{! template-lint-disable }}
+  <p
+    class="post-excerpt"
+    {{on "click" this.screenExcerptForExternalLink}}
+  >{{html-safe this.bookmark.excerpt}}</p>
+</th>
+{{#unless this.site.mobileView}}
+  <td class="topic-list-data">
+    {{#if this.bookmark.user.avatar_template}}
+      <a
+        href={{this.bookmark.user.path}}
+        data-user-card={{this.bookmark.user.username}}
+        class="avatar"
+      >
+        {{avatar
+          this.bookmark.user
+          avatarTemplatePath="avatar_template"
+          usernamePath="username"
+          namePath="name"
+          imageSize="small"
+        }}
+      </a>
+    {{/if}}
+  </td>
+  <td class="post-metadata topic-list-data">{{format-date
+      this.bookmark.updated_at
+      format="tiny"
+    }}</td>
+  {{raw
+    "list/activity-column"
+    topic=this.bookmark
+    class="num post-metadata"
+    tagName="td"
+  }}
+{{/unless}}
+<td class="topic-list-data">
+  <BookmarkActionsDropdown
+    @bookmark={{this.bookmark}}
+    @removeBookmark={{action "removeBookmark"}}
+    @editBookmark={{action "editBookmark"}}
+    @clearBookmarkReminder={{action "clearBookmarkReminder"}}
+    @togglePinBookmark={{action "togglePinBookmark"}}
+  />
+</td>

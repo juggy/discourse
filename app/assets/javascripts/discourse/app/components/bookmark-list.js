@@ -1,19 +1,11 @@
 import Component from "@ember/component";
 import { action } from "@ember/object";
 import { next, schedule } from "@ember/runloop";
-import { openBookmarkModal } from "discourse/controllers/bookmark";
-import { ajax } from "discourse/lib/ajax";
-import {
-  openLinkInNewTab,
-  shouldOpenInNewTab,
-} from "discourse/lib/click-track";
 import Scrolling from "discourse/mixins/scrolling";
-import I18n from "I18n";
-import { Promise } from "rsvp";
-import { inject as service } from "@ember/service";
+import BulkTopicSelection from "discourse/mixins/bulk-topic-selection";
+import showModal from "discourse/lib/show-modal";
 
-export default Component.extend(Scrolling, {
-  dialog: service(),
+export default Component.extend(Scrolling, BulkTopicSelection, {
   classNames: ["bookmark-list-wrapper"],
 
   didInsertElement() {
@@ -44,77 +36,40 @@ export default Component.extend(Scrolling, {
   },
 
   @action
-  removeBookmark(bookmark) {
-    return new Promise((resolve, reject) => {
-      const deleteBookmark = () => {
-        bookmark
-          .destroy()
-          .then(() => {
-            this.appEvents.trigger(
-              "bookmarks:changed",
-              null,
-              bookmark.attachedTo()
-            );
-            this._removeBookmarkFromList(bookmark);
-            resolve(true);
-          })
-          .catch((error) => {
-            reject(error);
-          });
-      };
-      if (!bookmark.reminder_at) {
-        return deleteBookmark();
-      }
-      this.dialog.deleteConfirm({
-        message: I18n.t("bookmarks.confirm_delete"),
-        didConfirm: () => deleteBookmark(),
-        didCancel: () => resolve(false),
-      });
-    });
+  bulkSelectAll() {
+    this.send("updateAutoAddTopicsToBulkSelect", true);
+    document
+      .querySelectorAll("input.bulk-select:not(:checked)")
+      .forEach((el) => el.click());
   },
 
   @action
-  screenExcerptForExternalLink(event) {
-    if (event?.target?.tagName === "A") {
-      if (shouldOpenInNewTab(event.target.href)) {
-        openLinkInNewTab(event, event.target);
-      }
-    }
+  bulkClearAll() {
+    this.send("updateAutoAddTopicsToBulkSelect", false);
+    document
+      .querySelectorAll("input.bulk-select:checked")
+      .forEach((el) => el.click());
   },
 
   @action
-  editBookmark(bookmark) {
-    openBookmarkModal(bookmark, {
-      onAfterSave: (savedData) => {
-        this.appEvents.trigger(
-          "bookmarks:changed",
-          savedData,
-          bookmark.attachedTo()
-        );
-        this.reload();
+  selectBookmark(bookmark) {
+    this.selected.addObject(bookmark);
+  },
+
+  @action
+  unselectBookmark(bookmark) {
+    this.selected.removeObject(bookmark);
+  },
+
+  @action
+  showBulkActions() {
+    const controller = showModal("bookmark-bulk-actions", {
+      model: {
+        topics: this.selected
       },
-      onAfterDelete: () => {
-        this.reload();
-      },
+      title: "topics.bulk.actions",
     });
-  },
 
-  @action
-  clearBookmarkReminder(bookmark) {
-    return ajax(`/bookmarks/${bookmark.id}`, {
-      type: "PUT",
-      data: { reminder_at: null },
-    }).then(() => {
-      bookmark.set("reminder_at", null);
-    });
-  },
-
-  @action
-  togglePinBookmark(bookmark) {
-    bookmark.togglePin().then(this.reload);
-  },
-
-  _removeBookmarkFromList(bookmark) {
-    this.content.removeObject(bookmark);
-  },
+    controller.set("refreshClosure", () => this.send("refresh"));
+  }
 });
