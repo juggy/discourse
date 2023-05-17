@@ -38,12 +38,12 @@ class BookmarksBulkAction
   def clear_reminder
     bookmarks = @user.bookmarks.where(id: @bookmarks_ids)
     bookmarks.update_all(reminder_last_sent_at: Time.zone.now, reminder_set_at: nil)
-    @changed_ids = bookmarks.select(:id)
+    @changed_ids = bookmarks.pluck(:id)
   end
 
   def delete_reminder
     bookmarks = @user.bookmarks.where(id: @bookmarks_ids)
     bookmarks.update_all(reminder_at: nil, reminder_set_at: nil)
-    @changed_ids = bookmarks.select(:id)
+    @changed_ids = bookmarks.pluck(:id)
   end
 end
