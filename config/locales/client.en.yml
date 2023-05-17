@@ -339,6 +339,21 @@ en:
         unbookmark_with_reminder: "Click to remove all bookmarks and reminders in this topic"
 
     bookmarks:
+      bulk:
+        select_all: "Select All"
+        clear_all: "Clear All"
+        toggle: "toggle bulk selection of bookmarks"
+        delete: "Delete bookmarks"
+        clear_reminder: "Clear reminders"
+        delete_reminder: "Delete reminders"
+        actions: "Bulk Actions"
+        selected:
+          one: "You have selected <b>%{count}</b> bookmark."
+          other: "You have selected <b>%{count}</b> bookmarks."
+        progress:
+          one: "Progress: <strong>%{count}</strong> bookmark"
+          other: "Progress: <strong>%{count}</strong> bookmarks"
+
       created: "You've bookmarked this post. %{name}"
       created_generic: "You've bookmarked this. %{name}"
       create: "Create bookmark"
@@ -3621,20 +3636,6 @@ en:
             button: "HTML"
 
       bookmarks:
-        bulk:
-          select_all: "Select All"
-          clear_all: "Clear All"
-          toggle: "toggle bulk selection of bookmarks"
-          delete: "Delete Bookmarks"
-          clear_reminder: "Clear reminder"
-          actions: "Bulk Actions"
-          selected:
-            one: "You have selected <b>%{count}</b> topic."
-            other: "You have selected <b>%{count}</b> topics."
-          progress:
-            one: "Progress: <strong>%{count}</strong> topic"
-            other: "Progress: <strong>%{count}</strong> topics"
-
         create: "Create bookmark"
         create_for_topic: "Create bookmark for topic"
         edit: "Edit bookmark"

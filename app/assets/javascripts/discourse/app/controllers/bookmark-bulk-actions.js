@@ -23,21 +23,21 @@ function addBulkButton(action, key, opts) {
 
 // Default buttons
 addBulkButton("clearReminder", "clear_reminder", {
-  icon: "bookmark",
-  class: "btn-default",
+  icon: "far-clock",
+  class: "btn-default clear-reminder",
   buttonVisible: (bookmarks) =>
     bookmarks.some((b) => b.reminder_set_at !== null),
 });
 
 addBulkButton("deleteReminder", "delete_reminder", {
-  icon: "bookmark",
-  class: "btn-default",
+  icon: "trash-alt",
+  class: "btn-default delete-reminder",
   buttonVisible: (bookmarks) => bookmarks.some((b) => b.reminder_at),
 });
 
 addBulkButton("deleteBookmark", "delete", {
-  icon: "bookmark",
-  class: "btn-default",
+  icon: "trash-alt",
+  class: "btn-danger delete-bookmark",
 });
 
 // Modal for performing bulk actions on topics

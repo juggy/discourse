@@ -13,27 +13,28 @@ import I18n from "I18n";
 export default Component.extend({
   tagName: "tr",
   classNames: ["topic-list-item", "bookmark-list-item"],
-
   dialog: service(),
 
-  click( e) {
+  click(e) {
     const selected = this.selected,
-          bookmark = this.bookmark;
+      bookmark = this.bookmark;
 
     if (!e.target.classList.contains("bulk-select")) {
       return;
     }
 
+    const lastChecked = document.querySelector("[data-last-checked=true]");
+
     if (selected.indexOf(bookmark) < 0) {
       this.select(bookmark);
 
       // allow for shift-click for selection
-      if (this.lastChecked && e.shiftKey) {
+      if (lastChecked && e.shiftKey) {
         const bulkSelects = Array.from(
             document.querySelectorAll("input.bulk-select")
           ),
           from = bulkSelects.indexOf(e.target),
-          to = bulkSelects.findIndex((el) => el.id === this.lastChecked.id),
+          to = bulkSelects.findIndex((el) => el.id === lastChecked.id),
           start = Math.min(from, to),
           end = Math.max(from, to);
 
@@ -43,11 +44,15 @@ export default Component.extend({
           .forEach((checkbox) => {
             checkbox.click();
           });
+
+        lastChecked.dataset.lastChecked = false;
       }
-      this.set("lastChecked", e.target);
+      e.target.dataset.lastChecked = true;
     } else {
       this.unselect(bookmark);
-      this.set("lastChecked", null);
+      if (lastChecked) {
+        lastChecked.dataset.lastChecked = false;
+      }
     }
   },
 
@@ -59,7 +64,6 @@ export default Component.extend({
       }
     }
   },
-
 
   @action
   removeBookmark(bookmark) {
@@ -73,7 +77,7 @@ export default Component.extend({
               null,
               bookmark.attachedTo()
             );
-            this._removeBookmarkFromList(bookmark);
+            this.remove ? this.remove(bookmark) : null;
             resolve(true);
           })
           .catch((error) => {
@@ -121,9 +125,5 @@ export default Component.extend({
   @action
   togglePinBookmark(bookmark) {
     bookmark.togglePin().then(this.reload);
-  },
-
-  _removeBookmarkFromList(bookmark) {
-    this.content.removeObject(bookmark);
   },
 });

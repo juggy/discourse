@@ -57,6 +57,11 @@ export default Component.extend(Scrolling, BulkTopicSelection, {
   },
 
   @action
+  removeBookmark(bookmark) {
+    this.content.removeObject(bookmark);
+  },
+
+  @action
   unselectBookmark(bookmark) {
     this.selected.removeObject(bookmark);
   },

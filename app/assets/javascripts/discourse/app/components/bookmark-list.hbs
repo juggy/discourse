@@ -11,7 +11,8 @@
           @toggleBulkSelection={{action "toggleBulkSelect"}}
           @selectAll={{action "bulkSelectAll"}}
           @clearAll={{action "bulkClearAll"}}
-          @bulkActions={{action "showBulkActions"}} />
+          @bulkActions={{action "showBulkActions"}}
+        />
       </thead>
       <tbody class="topic-list-body">
         {{#each this.content as |bookmark|}}
@@ -20,8 +21,10 @@
             @selected={{this.selected}}
             @bulkSelectEnabled={{this.bulkSelectEnabled}}
             @select={{action "selectBookmark"}}
+            @remove={{action "removeBookmark"}}
             @unselect={{action "unselectBookmark"}}
-            @reload={{this.reload}} />
+            @reload={{this.reload}}
+          />
         {{/each}}
       </tbody>
     </table>
