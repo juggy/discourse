@@ -8,11 +8,17 @@ export default Mixin.create({
   dialog: service(),
 
   processedCount: 0,
+  chunkSize: 30,
+  bulkActionModal: "modal/topic-bulk-actions",
 
   perform(toProcess, operation) {
     this.set("processedCount", 0);
-    if (toProcess.length > 20) {
-      this.send("changeBulkTemplate", "modal/bulk-progress");
+    if (toProcess.length > this.chunkSize / 2) {
+      this.send(
+        "changeBulkTemplate",
+        "modal/bulk-progress",
+        this.bulkActionModal
+      );
     }
 
     this.set("loading", true);
@@ -28,7 +34,7 @@ export default Mixin.create({
 
   _generateChunks(allItems) {
     let startIndex = 0;
-    const chunkSize = 30;
+    const chunkSize = this.chunkSize;
     const chunks = [];
 
     while (startIndex < allItems.length) {

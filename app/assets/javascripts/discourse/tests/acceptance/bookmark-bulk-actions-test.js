@@ -146,4 +146,31 @@ acceptance("Bookmark - Bulk Actions", function (needs) {
       "Bottom-up Shift click range selection works"
     );
   });
+
+  test("bulk actions in chunks", async function (assert) {
+    // set chunk size to a lower value
+    const controller = this.container.lookup(
+      "controller:bookmark-bulk-actions"
+    );
+    controller.set("chunkSize", 2);
+
+    let oldBulk = controller.bulkOperation,
+      bulkCalls = 0;
+    controller.bulkOperation = async function (items, operation) {
+      bulkCalls++;
+      return oldBulk(items, operation);
+    };
+
+    // go to the page and select all
+    await visit(`/u/${loggedInUser().username}/activity/bookmarks`);
+    await click("button.bulk-select");
+
+    await click(query(".bulk-select-all"));
+
+    await click(".bulk-select-actions");
+    await click(".modal-body .delete-bookmark");
+
+    // this should trigger 4 calls to the bulk endpoint
+    assert.ok(bulkCalls === 5, "has made bulk calls");
+  });
 });

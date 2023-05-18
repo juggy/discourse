@@ -57,10 +57,11 @@ export default Controller.extend(ModalFunctionality, BulkActions, {
     this.send(
       "changeBulkTemplate",
       "modal/bulk-actions-buttons",
-      "modal/bookmark-bulk-actions"
+      this.bulkActionModal
     );
   },
 
+  bulkActionModal: "modal/bookmark-bulk-actions",
   bulkOperation: Bookmark.bulkOperation,
 
   idsFromResults(result) {
