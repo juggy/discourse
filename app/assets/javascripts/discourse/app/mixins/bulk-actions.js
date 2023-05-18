@@ -4,8 +4,6 @@ import { inject as service } from "@ember/service";
 
 function identity() {}
 
-// Include this mixin if you want to be notified when the dom should be
-// cleaned (usually on route change.)
 export default Mixin.create({
   dialog: service(),
 
