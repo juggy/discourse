@@ -5,6 +5,7 @@ import {
   loggedInUser,
   query,
   queryAll,
+  visible,
 } from "discourse/tests/helpers/qunit-helpers";
 import { click, triggerEvent, visit } from "@ember/test-helpers";
 import bookmarkFixtures from "discourse/tests/fixtures/bookmark-fixtures";
@@ -79,9 +80,17 @@ acceptance("Bookmark - Bulk Actions", function (needs) {
 
     await click("button.bulk-select");
 
-    await click(query(".bulk-select-all"));
+    await click(query("#bulk-select-8"));
 
     await click(".bulk-select-actions");
+    assert.ok(
+      visible(".modal-body .delete-reminder"),
+      "it shows delete reminder"
+    );
+    assert.ok(
+      visible(".modal-body .delete-bookmark"),
+      "it shows delete bookmarks"
+    );
     await click(".modal-body .clear-reminder");
 
     assert.ok(
@@ -94,9 +103,17 @@ acceptance("Bookmark - Bulk Actions", function (needs) {
     await visit(`/u/${loggedInUser().username}/activity/bookmarks`);
     await click("button.bulk-select");
 
-    await click(query(".bulk-select-all"));
+    await click(query("#bulk-select-7"));
 
     await click(".bulk-select-actions");
+    assert.ok(
+      invisible(".modal-body .clear-reminder"),
+      "it does not show clear reminder"
+    );
+    assert.ok(
+      visible(".modal-body .delete-bookmark"),
+      "it shows delete bookmarks"
+    );
     await click(".modal-body .delete-reminder");
 
     assert.ok(
@@ -109,9 +126,18 @@ acceptance("Bookmark - Bulk Actions", function (needs) {
     await visit(`/u/${loggedInUser().username}/activity/bookmarks`);
     await click("button.bulk-select");
 
-    await click(query(".bulk-select-all"));
+    await click(query("#bulk-select-6"));
 
     await click(".bulk-select-actions");
+    assert.ok(
+      invisible(".modal-body .clear-reminder"),
+      "it does not show clear reminder"
+    );
+    assert.ok(
+      invisible(".modal-body .delete-reminder"),
+      "it does not shows delete reminder"
+    );
+
     await click(".modal-body .delete-bookmark");
 
     assert.ok(
